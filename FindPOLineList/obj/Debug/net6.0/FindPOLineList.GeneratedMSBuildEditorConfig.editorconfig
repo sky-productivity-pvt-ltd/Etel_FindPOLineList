@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = FindPOLineList
-build_property.ProjectDir = D:\Bitbuket\FindPOLineList\FindPOLineList\
+build_property.ProjectDir = E:\GitHub\Etel_FindPOLineList\FindPOLineList\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

@@ -546,11 +546,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Bitbuket\\FindPOLineList\\FindPOLineList\\FindPOLineList.csproj",
+      "projectUniqueName": "E:\\GitHub\\Etel_FindPOLineList\\FindPOLineList\\FindPOLineList.csproj",
       "projectName": "FindPOLineList",
-      "projectPath": "D:\\Bitbuket\\FindPOLineList\\FindPOLineList\\FindPOLineList.csproj",
+      "projectPath": "E:\\GitHub\\Etel_FindPOLineList\\FindPOLineList\\FindPOLineList.csproj",
       "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "D:\\Bitbuket\\FindPOLineList\\FindPOLineList\\obj\\",
+      "outputPath": "E:\\GitHub\\Etel_FindPOLineList\\FindPOLineList\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",

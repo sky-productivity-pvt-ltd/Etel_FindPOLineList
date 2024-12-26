@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ZGBl3T6kEegELz5omPd66BgeSS9S0Gdr3cooJVJJvFwWkVUNfxGQVW85mbyOiKSBINcXQn+Z2Dcd/TgcEoaWtg==",
+  "dgSpecHash": "L3XI4ON+O2Dp04i87aRbtGkJW6p0JQLsQ4uwpUNJeukhGGNyGMGZvD0QsrvPhk8o9A+HkMntNfXZNyd6vazANg==",
   "success": true,
-  "projectFilePath": "D:\\Bitbuket\\FindPOLineList\\FindPOLineList\\FindPOLineList.csproj",
+  "projectFilePath": "E:\\GitHub\\Etel_FindPOLineList\\FindPOLineList\\FindPOLineList.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.win32.registry\\4.7.0\\microsoft.win32.registry.4.7.0.nupkg.sha512",

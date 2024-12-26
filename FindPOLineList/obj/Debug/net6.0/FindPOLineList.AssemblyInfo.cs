@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FindPOLineList")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1a980d42dca8be103c52d6fd6a6463330abf4d77")]
 [assembly: System.Reflection.AssemblyProductAttribute("FindPOLineList")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FindPOLineList")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
@@ -59,7 +60,6 @@ namespace FindPOLineList
 
                         string jobid = POCallationAPICall(PoLine_Taskid);
 
-
                         ///update JobID and Status
 
                         JArray MainJA = new JArray
@@ -81,16 +81,19 @@ namespace FindPOLineList
                 for (int j = 0; j < DATA.Count; j++)
                 {
 
+                    JArray BillToCompany = new JArray();
+                    JArray CompanyJA = new JArray();
 
+                    JToken[] contoryJAt = CountryJA.Where(z => z["Name"].ToString().ToUpper() == DATA[j]["shipToLocationCode"].ToString().ToUpper()).ToArray();
+
+                    if (contoryJAt.Count() > 0)
+                    {
+                        BillToCompany = FillBillToCompany(contoryJAt[0]["Name"].ToString());
+                    }
 
                     string Server_parent_task_id = "0";
                     string Server_Sub_task_id = "0";
-
-
-                   
-
-
-
+                    
                     #region Check E TeL Parent Task
                     string poNumber = DATA[j]["poNumber"].ToString();
 
@@ -102,11 +105,15 @@ namespace FindPOLineList
                     };
                     DataTable potaskdt = DB.GetData("CheckETel_ParentTask", Po_Ja);
 
+
+
                     if (potaskdt.Rows.Count > 0)
                     {
                         Server_parent_task_id = potaskdt.Rows[0]["task_id"].ToString();
                     }
                     #endregion
+
+
                     #region E TeL Parent Task Creattion Jayanti
                     if (Server_parent_task_id == "0")
                     {
@@ -125,9 +132,9 @@ namespace FindPOLineList
                             string AllDataJSon = dt.Rows[0]["AllData"].ToString();
                             JArray AllDataJA = JArray.Parse(AllDataJSon);
                             string DataJson = AllDataJA[0]["step_data"][0]["step"][0]["data"].ToString();
-                            JArray DataJsonJA = JArray.Parse(ThreeKeyLogic.ThreeKeyLogicConvert(JArray.Parse(DataJson)));
+                            JArray DataJsonJA = JArray.Parse(DataJson);
 
-
+                           // JArray DataJsonJA = JArray.Parse(ThreeKeyLogic.ThreeKeyLogicConvert(JArray.Parse(DataJson)));
                             DataTable Controldt = GetE_Tel_TaskControlDT("parent");
                             for (int i = 0; i < Controldt.Rows.Count; i++)
                             {
@@ -152,9 +159,15 @@ namespace FindPOLineList
                                     }
                                     else if (QueID == "1")
                                     {
-                                        Conrol_ANS[0][0] = "HUAWEI TECHNOLOGIES (TANZANIA) COMPANY LIMITED";
-                                        Conrol_ANS[0][0].AddAfterSelf("22326");
+                                        Conrol_ANS[0][0] = BillToCompany[0];
 
+                                        Conrol_ANS[0][0].AddAfterSelf(BillToCompany[1]);
+
+                                        JToken[] ConrolAutofill = DataJsonJA.Where(z => z["que_id"].ToString() == QueID).ToArray();
+
+                                        CompanyJA = FillCompanyDetails(ConrolAutofill[0],ref DataJsonJA,contoryJAt[0]["Name"].ToString());
+
+                                       
                                     }
                                     else if (QueID == "13")
                                     {
@@ -163,10 +176,12 @@ namespace FindPOLineList
 
                                         if (AnsJA1.Count() > 0)
                                         {
-                                            Conrol_ANS[0][0] =  AnsJA1[0]["Name"].ToString();
+                                            Conrol_ANS[0][0] = AnsJA1[0]["Name"].ToString();
 
                                             Conrol_ANS[0][0].AddAfterSelf(AnsJA1[0]["ID"].ToString());
                                         }
+
+                                        //Conrol_ANS[0] = BillToCompany;
 
                                     }
                                     else if (QueID == "15")
@@ -199,6 +214,17 @@ namespace FindPOLineList
                                         Conrol_ANS[0][0] = ans;
 
                                     }
+                                    else if (QueID == "1093")
+                                    {
+                                       Conrol_ANS[0][0] = "Yes";
+
+                                    }
+                                    else if (QueID == "1135")
+                                    {
+
+                                        Conrol_ANS[0][0] = poNumber;
+
+                                    }
 
                                     else
                                     {
@@ -225,7 +251,7 @@ namespace FindPOLineList
 
 
 
-                            string api_responce = CA.CreateTaskAPI(companyId, Parent_checksheeId, 1, 0, 0, 0, DataJsonJA);
+                            string api_responce = CA.CreateTaskAPI(companyId, Parent_checksheeId, 1, 0, 0, 0, JArray.Parse(ThreeKeyLogic.ThreeKeyLogicConvert(DataJsonJA)));
                             if (api_responce != "")
                             {
                                 Rtn_ja = JArray.Parse(api_responce);
@@ -988,6 +1014,220 @@ namespace FindPOLineList
                         answe = (JArray)JToken.FromObject(list_ans);
                     }
                     #endregion
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+            return answe;
+        }
+
+
+        public JArray FillBillToCompany(string country)
+        {
+            JArray answe = new JArray();
+
+            try
+            {
+                string type20payload = @"[{""flag"":1,""value_new"":[{""default_value"":[""""],""view_label"":""true"",""autofill"":""true"",""auto_select_first"":""false"",""self_assignment"":""false"",""qr"":""false"",""search"":""false"",""push_data"":[{""push_array"":[{""value"":""<@cls_Cou_90935_13@>"",""type"":""text"",""ans"":""@country@""}],""window_style"":""attached"",""view_style"":""dropdownview"",""customer_checksheetid"":""0"",""multi_select"":""false"",""ddl_info_view"":""true"",""select_all"":""true"",""add_cust_from_search"":""false"",""fetch_limit"":""50""}],""barcode"":""false"",""Checksheet_id"":""91396"",""columndata"":[{""checksheetID"":""91396"",""step"":""1"",""qid"":""1"",""header"":"" Customer Company"",""position"":""2"",""format"":""bold"",""font_size"":""8"",""color"":""""},{""checksheetID"":""91396"",""step"":""1"",""qid"":""15"",""header"":"" Customer Name"",""position"":""3"",""format"":""bold"",""font_size"":""8"",""color"":""""},{""checksheetID"":""91396"",""step"":""1"",""qid"":""60"",""header"":"" Account Code"",""position"":""4"",""format"":""bold"",""font_size"":""8"",""color"":""""},{""checksheetID"":""91396"",""step"":""1"",""qid"":""16"",""header"":"" Vendor Code"",""position"":""5"",""format"":""bold"",""font_size"":""8"",""color"":""""}],""Fill_Data"":[{""classname"":""cust_company"",""fieldname"":""Customer Name"",""queid"":""15"",""editable"":""false"",""objectfill"":""control""},{""classname"":""cust_add"",""fieldname"":""Address"",""queid"":""10"",""editable"":""false"",""objectfill"":""control""},{""classname"":""cust_phon"",""fieldname"":""Phone No."",""queid"":""20"",""editable"":""false"",""objectfill"":""control""}],""Target_Id"":""CUSTOMER_ID"",""Target_Value"":""CustomerUniq"",""SearchID"":33844,""SearchName"":""Customer Name3025-1-1-1-1"",""Query_type"":""Formatted"",""ques_id"":1,""Current_Checksheet_id"":90935,""OFFSET"":0,""FETCH"":50,""searchValue"":""""}],""searchable_id"":""ddl_search_type20_0_90935_1"",""auth1"":[{""username"":""system.tanzania"",""u_c"":"""",""user_id"":""64132""}]}]";
+
+                type20payload = type20payload.Replace("@country@", country);
+
+                CallAPI CA = new CallAPI();
+
+                string Returndate = CA.Type20API(JArray.Parse(type20payload));
+
+                JArray Json_final_ = JArray.Parse(Returndate);
+
+                string status = Json_final_[0]["status"].ToString();
+
+                if (status == "1")
+                {
+                    #region  Status1
+                    JArray Message = JArray.Parse(Json_final_[0]["data"].ToString());
+                    foreach (JObject content in Message.Children<JObject>())
+                    {
+                        List<string> keys = content.Properties().Select(p => p.Name).ToList();
+
+
+                        List<string> list = new List<string>();
+                        int ID = 0;
+                        string name = "";
+                        for (int ii = 0; ii < keys.Count; ii++)
+                        {
+                            if (ii == 0)
+                            {
+                                ID = Convert.ToInt32(Message[0].ToObject<JObject>().GetValue(keys[ii]).ToString());
+                            }
+
+                            if (ii == 1)
+                            {
+                                name = Message[0].ToObject<JObject>().GetValue(keys[ii]).ToString();
+                                //name = Controle_Obj["ans"][0].ToString().TrimStart().TrimEnd();
+                            }
+                        }
+                        list.Add(name);
+                        list.Add(ID.ToString());
+                        List<string> list_ans = new List<string>
+                                        {
+                                            name,
+                                            ID.ToString()
+                                        };
+                        answe = (JArray)JToken.FromObject(list_ans);
+                    }
+                    #endregion
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+            return answe;
+        }
+
+        public JArray FillCompanyDetails(JToken Controle_Obj, ref JArray List_Checksheet_All, string country)
+        {
+            JArray answe = new JArray();
+
+            try
+            {
+                string value_new = Controle_Obj["prop"][0]["value_new"].ToString();
+                JArray Ja_value_new = JArray.Parse(value_new);
+                JArray Fill_Data = Ja_value_new[0]["Fill_Data"].Value<JArray>();
+
+                string type20payload = @"[{""flag"":2,""value_new"":[{""default_value"":[""""],""view_label"":""true"",""autofill"":""true"",""auto_select_first"":""false"",""self_assignment"":""false"",""qr"":""false"",""search"":""false"",""push_data"":[{""push_array"":[{""value"":""<@cls_Cou_90935_13@>"",""type"":""text"",""ans"":""@country@""}],""window_style"":""attached"",""view_style"":""dropdownview"",""customer_checksheetid"":""0"",""multi_select"":""false"",""ddl_info_view"":""true"",""select_all"":""true"",""add_cust_from_search"":""false"",""fetch_limit"":""50""}],""barcode"":""false"",""Checksheet_id"":""91396"",""columndata"":[{""checksheetID"":""91396"",""step"":""1"",""qid"":""1"",""header"":"" Customer Company"",""position"":""2"",""format"":""bold"",""font_size"":""8"",""color"":""""},{""checksheetID"":""91396"",""step"":""1"",""qid"":""15"",""header"":"" Customer Name"",""position"":""3"",""format"":""bold"",""font_size"":""8"",""color"":""""},{""checksheetID"":""91396"",""step"":""1"",""qid"":""60"",""header"":"" Account Code"",""position"":""4"",""format"":""bold"",""font_size"":""8"",""color"":""""},{""checksheetID"":""91396"",""step"":""1"",""qid"":""16"",""header"":"" Vendor Code"",""position"":""5"",""format"":""bold"",""font_size"":""8"",""color"":""""}],""Fill_Data"":[{""classname"":""cust_company"",""fieldname"":""Customer Name"",""queid"":""15"",""editable"":""false"",""objectfill"":""control""},{""classname"":""cust_add"",""fieldname"":""Address"",""queid"":""10"",""editable"":""false"",""objectfill"":""control""},{""classname"":""cust_phon"",""fieldname"":""Phone No."",""queid"":""20"",""editable"":""false"",""objectfill"":""control""}],""Target_Id"":""CUSTOMER_ID"",""Target_Value"":""CustomerUniq"",""SearchID"":33844,""SearchName"":""Customer Name3025-1-1-1-1"",""Query_type"":""Formatted"",""ques_id"":1,""Current_Checksheet_id"":90935,""OFFSET"":""0"",""FETCH"":""0"",""searchValue"":""862603""}],""searchable_id"":""ddl_search_type20_0_90935_1"",""auth1"":[{""username"":""system.tanzania"",""u_c"":"""",""user_id"":""64132""}]}]";
+
+                type20payload = type20payload.Replace("@country@", country);
+
+                CallAPI CA = new CallAPI();
+
+                string Returndate = CA.Type20API(JArray.Parse(type20payload));
+
+                JArray Json_final_ = JArray.Parse(Returndate);
+
+
+                JArray Json_final_Fill = JArray.Parse(Returndate);
+
+                string status_Fill = Json_final_Fill[0]["status"].ToString();
+                JToken Detais = JToken.Parse(Json_final_Fill[0]["data"].ToString());
+
+                if (status_Fill == "1")
+                {
+                    #region  Status1
+
+                    //JavaScriptSerializer serializer = new JavaScriptSerializer();
+
+                    //List<innerdata> List_Checksheet_Data_20 = serializer.Deserialize<List<innerdata>>();
+                    JArray List_Checksheet_Data_20 = JArray.Parse(Detais[0]["detail"].ToString());
+
+
+                    for (int fill_ = 0; fill_ < Fill_Data.Count; fill_++)
+                    {
+                        string classname = Fill_Data[fill_]["classname"].ToString();
+                        string fieldname = Fill_Data[fill_]["fieldname"].ToString();
+                        string queid_fill = "";
+
+                        try
+                        {
+                            queid_fill = Fill_Data[fill_]["queid"].ToString();
+                        }
+                        catch { }
+                        string Fill_true_flag = Fill_Data[fill_]["editable"].ToString();
+                        if (Fill_true_flag.ToUpper() != "TRUE")
+                        {
+                            for (int Log_obj_ = 0; Log_obj_ < List_Checksheet_All.Count(); Log_obj_++)
+                            {
+                                int check_type_1 = Convert.ToInt32(List_Checksheet_All[Log_obj_]["type"].ToString());
+                                if ((check_type_1 != 0) && (check_type_1 != 10) && (check_type_1 != 5))
+                                {
+                                    string SA_Class = List_Checksheet_All[Log_obj_]["prop"][0]["class1"].ToString();
+                                    string className_1 = "";
+                                    if (SA_Class != "" && SA_Class != "[]")
+                                    {
+                                        className_1 = List_Checksheet_All[Log_obj_]["prop"][0]["class1"][0].ToString();
+                                    }
+
+                                    if (className_1 == classname)
+                                    {
+                                        for (int log_data_obj_ = 0; log_data_obj_ < List_Checksheet_Data_20.Count; log_data_obj_++)
+                                        {
+                                            int check_type_ = Convert.ToInt32(List_Checksheet_Data_20[log_data_obj_]["type"].ToString());
+                                            if ((check_type_ != 0) && (check_type_ != 10) && (check_type_ != 5))
+                                            {
+                                                bool fielnamecheck = false;
+                                                bool queidcheck = false;
+                                                string fieldname_ = "NA";
+                                                string queidAct = "NA";
+                                                try
+                                                {
+
+                                                    fieldname_ = List_Checksheet_Data_20[log_data_obj_]["prop"][0]["name"].ToString();
+                                                }
+                                                catch
+                                                {
+                                                    queidAct = List_Checksheet_Data_20[log_data_obj_]["que_id"].ToString();
+                                                }
+
+                                                if (fieldname_ == fieldname) { fielnamecheck = true; }
+                                                if (queidAct == queid_fill) { queidcheck = true; }
+                                                if (fielnamecheck == true || queidcheck == true)
+                                                {
+
+                                                    string ans_ = List_Checksheet_Data_20[log_data_obj_]["ans"][0].ToString();
+
+                                                    if (List_Checksheet_All[Log_obj_]["ans"][0].ToString() != "")
+                                                    {
+                                                        if (List_Checksheet_All[Log_obj_]["ans"][0].ToString() != ans_)
+                                                        {
+
+                                                            JObject Add_Object = new JObject
+                                                                                    {
+                                                                                        new JProperty("type", 20),
+                                                                                        new JProperty("que_id", Controle_Obj["que_id"].ToString()),
+                                                                                        new JProperty("Header", Controle_Obj["Excel_Header"].ToString()),
+                                                                                        new JProperty("error", List_Checksheet_All[Log_obj_]["Excel_Header"].ToString() + " is Invalid", List_Checksheet_All[Log_obj_]["ans"][0].ToString()),
+                                                                                        new JProperty("name", Controle_Obj["prop"][0]["name"].ToString())
+                                                                                    };
+                                                            //Error_Control_list.Add(Add_Object);
+                                                            ////Insert_error.Insert_error_Log_(excel_id, task_id.ToString(), Controle_Obj["Excel_Header"].ToString() + " Error -" + Json_final_[0]["message"].ToString(), Controle_Obj["ans"][0].ToString(), Row_count, column_index, global);
+                                                            //flag_return++;
+                                                            //Flag_create_tbl = 1;
+                                                        }
+
+                                                    }
+                                                    else
+                                                    {
+                                                        List_Checksheet_All[Log_obj_]["ans"] = List_Checksheet_Data_20[log_data_obj_]["ans"];
+                                                        break;
+
+                                                    }
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+
+
+                                
+
+                            }
+                        }
+
+
+                    }
+                    #endregion
+
+                }
+                else
+                {
+                   
                 }
             }
             catch (Exception ex)
